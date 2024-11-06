@@ -1,0 +1,12 @@
+names:
+  - 0:'Header'
+  - 1:'Title'
+  - 2:'Text'
+  - 3:'Figure'
+  - 4:'Foot'
+nc: 5
+path: D:\桌面\yolov10-main\datasets\bvn
+train: train/images
+val: val/images
+test: test/images
+
