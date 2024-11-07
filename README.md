@@ -113,3 +113,54 @@
        # 推理
        result = compiled_model([resized_image])[compiled_model.output(0)]
        # NMS处理等后续操作（省略部分代码）
+   ```
+### （五）结果可视化
+1. **可视化流程**
+   - 定义类别名称与颜色的映射关系。
+   - 遍历 XML 文件夹，读取每个 XML 文件并解析检测框位置、置信度、类别等信息。
+   - 绘制检测框并添加标签，保存至指定的输出文件夹中。
+  
+2. **示例代码（部分）**
+   ```python
+   class_names = {0: "标题", 1: "正文", 2: "图片", 3: "图表"}
+   colors = [(0, 255, 0), (0, 0, 255), (255, 0, 0), (0, 255, 255)]
+
+   input_folder = "test_images"
+   xml_folder = "xml_results"
+   output_folder = "visualized_results"
+   os.makedirs(output_folder, exist_ok=True)
+
+   for xml_file in os.listdir(xml_folder):
+      xml_path = os.path.join(xml_folder, xml_file)
+      image_file = xml_file.replace(".xml", ".jpg")
+      image_path = os.path.join(input_folder, image_file)
+      image = cv2.imread(image_path)
+
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    for obj in root.iter('object'):
+        class_id = int(obj.find('name').text)
+        confidence = float(obj.find('confidence').text)
+        bbox = obj.find('bndbox')
+        xmin = int(bbox.find('xmin').text)
+        ymin = int(bbox.find('ymin').text)
+        xmax = int(bbox.find('xmax').text)
+        ymax = int(bbox.find('ymax').text)
+
+        label = f"{class_names[class_id]} {confidence:.2f}"
+        color = colors[class_id]
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color, 2)
+        cv2.putText(image, label, (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+    output_path = os.path.join(output_folder, image_file)
+    cv2.imwrite(output_path, image)
+    print(f"Processed {image_file} and saved to {output_path}")
+   ```
+## 三、注意事事项
+ - 数据集的标注质量 对模型训练效果有很大影响，确保标注准确、完整。
+ - 在模型训练过程中，可以根据实际情况调整训练参数，如 epochs、batch、lr0 等，以优化模型性能。
+ - 模型转换为 OpenVINO 格式后，可以根据实际硬件环境选择合适的设备（如 CPU、GPU 等）进行推理，以提高推理速度。
+ - 在结果可视化过程中，如果遇到图像显示异常等问题，可以检查图像路径、类别映射等设置是否正确。
+
+     
+   
